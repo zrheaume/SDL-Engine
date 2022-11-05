@@ -3,19 +3,31 @@
 typedef struct WSIZE {
 	int width;
 	int height;
+
+	WSIZE() {}
+	WSIZE(int width, int height) : width(width), height(height){}
+
 }WSIZE;
 
-typedef enum ENGINE_PROGRAM
+class Program
 {
-	NO_PROGRAM,
-	TEST_PROGRAM_LINE
-} ENGINE_PROGRAM;
+protected:
+	SDL_Renderer* pRenderer = nullptr;
+public:
+	Program() {}
+	virtual ~Program() {}
 
+	virtual void OnEngineInit(SDL_Renderer*& const pEngineRenderer) final;
+	//virtual void HandleEvent(SDL_Event& const event) = 0;
+	virtual void Update() = 0;
+	virtual void Draw() = 0;
+};
 
 class Engine
 {
 private:
-	ENGINE_PROGRAM program;
+
+	Program* program;
 
 	SDL_Window* window;					// SDL window object
 	SDL_Renderer* renderer;				// SDL renderer object
@@ -27,57 +39,26 @@ private:
 	bool assetsInitializedSDL;			// indicates whether or not instance of Enigne has initialized SDL assests
 	bool isRunning;						// indicates whether or not instance of Engine is running
 
-
+	int counter;
+	int interval;
 
 public:
-	//Job* pJob;
-	unsigned int testCounter;			// temporary int for testing purposes
-	unsigned int testLineLength;		// temporary int for testing purposes
-	unsigned int testLineStep;			// temporary int for testing purposes
-
 
 	Engine();
 	~Engine();
 
+	void SetProgram(Program*& const pProgram);
 
 	void Init();
 	void Init(WSIZE size);
-
-	void SetProgram(ENGINE_PROGRAM prg);
 
 	void HandleEvents();
 	void Update();
 	void Draw();
 
 	void EngineMainLoop();
-
-	void TestProgramLine_SetStep(unsigned int step);
-	void TestProgramLine_Update();
-	void TestProgramLine_Draw();
-};
-
-class Program
-{
-protected:
-	SDL_Renderer* pRenderer = nullptr;
-public:
-	Program() {}
-	virtual ~Program() {}
-
-	virtual void OnEngineInit ( SDL_Renderer* ) {}
-	virtual void HandleEvent(const SDL_Event* event) = 0;
-	virtual void Update() = 0;
-	virtual void Draw() = 0;
 };
 
 
-class GridProgram : public Program
-{
-public:
 
-	GridProgram() {}
 
-	void HandleEvent(const SDL_Event* event) final;
-	void Update() final;
-	void Draw() final;
-};

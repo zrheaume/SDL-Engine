@@ -4,6 +4,12 @@
 
 #include <iostream>
 
+
+
+#define MAX_PROGRAMS = 10;
+
+
+
 //typedef struct WSIZE {
 //	int width;
 //	int height;
@@ -67,11 +73,18 @@ public:
 
 
 
-
-//class SimpleGridProgram : public Program
-//{
-//	 
-//};
+/*
+ *	NAME: Program::OnEngineInit
+ *
+ *	DESC:
+ *
+ *	ARGS: 
+ *		pEngineRenderer - 
+*/
+void Program::OnEngineInit(SDL_Renderer*& const pEngineRenderer )
+{
+	pRenderer = pEngineRenderer;
+}
 
 /*
  *	NAME: Engine::Engine - constructor
@@ -84,7 +97,8 @@ Engine::Engine()
 {
 	std::cout << "Constructing engine object\n";
 
-	program = ENGINE_PROGRAM::NO_PROGRAM;
+	program = nullptr;
+
 	renderer = nullptr;
 	window = nullptr;
 
@@ -95,11 +109,6 @@ Engine::Engine()
 
 	windowSize.width = 640;
 	windowSize.height = 480;
-
-	testCounter = 0;
-	testLineLength = 0;
-	testLineStep = 0;
-
 
 }
 
@@ -132,6 +141,10 @@ Engine::~Engine()
 	}
 }
 
+void Engine::SetProgram(Program*& const pProgram)
+{
+	program = pProgram;
+}
 
 /*
  *	NAME: Engine::Init - public method (0 overloads)
@@ -172,9 +185,8 @@ void Engine::Init()
 		{
 			std::cout << "SUCCEEDED\n";
 			assetsInitializedSDL = true;
-			/*SDL_SetRenderDrawColor(renderer, 255, 255, 255, 1);
-			SDL_RenderClear(renderer);
-			SDL_RenderPresent(renderer);*/
+
+			program->OnEngineInit(renderer);
 		}
 		else
 		{
@@ -190,6 +202,7 @@ void Engine::Init()
 
 }
 
+
 /*
  *	NAME: Engine::Init - public method (1 overloads)
  *
@@ -202,19 +215,6 @@ void Engine::Init(WSIZE size)
 	windowSize.width = size.width;
 	windowSize.height = size.height;
 	Init();
-
-}
-
-/*
- *	NAME: Engine::SetProgram() - public method (0 overloads)
- *
- *	DESC: Sets the program to be run by the engine
- *
- *	ARGS: ENGINE_PROGRAM prg
-*/
-void Engine::SetProgram(ENGINE_PROGRAM prg)
-{
-	program = prg;
 
 }
 
@@ -255,17 +255,7 @@ void Engine::HandleEvents()
 void Engine::Update()
 {
 	// logical code goes here
-
-	switch (program) {
-	case TEST_PROGRAM_LINE:
-		TestProgramLine_Update();
-		//pJob->Update();
-
-		break;
-	default:
-		break;
-
-	}
+	program->Update();
 
 }
 
@@ -283,14 +273,7 @@ void Engine::Draw()
 
 	// ======  other draw code here  =======
 
-	switch (program) {
-	case TEST_PROGRAM_LINE:
-		TestProgramLine_Draw();
-		break;
-	default:
-		break;
-
-	}
+	program->Draw();
 
 	// ====================================
 
@@ -331,70 +314,44 @@ void Engine::EngineMainLoop()
 }
 
 
-/*
- *	NAME: TestProgramLine_SetStep - public method
- *
- *	DESC: Sets the step/interval for line program
- *
- *	ARGS: usigned int step
-*/
-void Engine::TestProgramLine_SetStep(unsigned int step)
+class Grid : public Program
 {
-	testLineStep = step;
-}
+private:
+	int gridSpacing;
 
-/*
- *	NAME: Engine::TestProgramLine_Update
- *
- *	DESC: Updates releveant data for line program
- *
- *	ARGS:
-*/
-void Engine::TestProgramLine_Update()
-{
-	if ((testCounter % testLineStep) == 0)
+public:
+
+	Grid() :gridSpacing(50) {}
+
+	~Grid() {}
+
+	void Update() override final
 	{
-		if (testLineLength >= windowSize.width) {
-			//isRunning = false;
-		}
-		else
-		{
-			++testLineLength;
-		}
+
 	}
 
-	++testCounter;
-}
+	void Draw() override final
+	{
 
-/*
- *	NAME: Engine::TestProgramLine_Draw - public method
- *
- *	DESC: Draws releveant data for line program
- *
- *	ARGS:
-*/
-void Engine::TestProgramLine_Draw()
-{
-	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 1);
-	SDL_RenderDrawLine(renderer, 0, (windowSize.height / 2), testLineLength, (windowSize.height / 2));
-}
+	}
 
+
+};
 
 
 int main()
 {
 
-	Engine* engine = new Engine;
+	Engine engine;
+	Grid gridProgram;
 
 
 
-
-	engine->Init();
-	engine->EngineMainLoop();
-
+	engine.Init(WSIZE(750,750));
+	engine.EngineMainLoop();
 
 
-	delete engine;
+
 
 /*
 * 
